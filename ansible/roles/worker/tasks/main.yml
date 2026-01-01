@@ -1,0 +1,15 @@
+---
+- name: Read join command from master
+  slurp:
+    src: /tmp/kubeadm_join.txt
+  register: join_file
+  delegate_to: "{{ groups['master'][0] }}"
+  run_once: true
+
+- name: Set join command fact
+  set_fact:
+    join_cmd: "{{ join_file.content | b64decode | trim }}"
+
+- name: Join the worker node to the cluster
+  command: "{{ join_cmd }}"
+
