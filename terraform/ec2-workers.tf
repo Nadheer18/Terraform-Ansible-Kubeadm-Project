@@ -1,5 +1,5 @@
 resource "aws_instance" "worker" {
-  count                  = var.node_count - 1 # only master excluded
+  count                  = var.node_count - 5 # master + jenkins
   ami                    = var.ami_id
   instance_type          = var.instance_type
   key_name               = var.key_name

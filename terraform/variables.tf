@@ -20,6 +20,10 @@ variable "ami_id" {
 
 variable "node_count" {
   type        = number
-  default     = 5 # 1 master + 1 jenkins + 3 workers
+  default     = 6 # 1 master + 1 jenkins + 3 workers + 1 DevOps-Server
 }
 
+variable "enable_Jenkins" {
+  type    = bool
+  default = false
+}
