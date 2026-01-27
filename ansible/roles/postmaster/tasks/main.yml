@@ -83,3 +83,58 @@
   debug:
     var: nodes_output.stdout_lines
 
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+# NGINX installation
+- name: Install NGINX
+  apt:
+    name: nginx
+    state: present
+
+# Create NGINX config file
+- name: Configure NGINX reverse proxy for ecommerce
+  copy:
+    dest: /etc/nginx/sites-available/ecommerce
+    content: |
+      upstream ecommerce_backend {
+          server 10.0.1.200:80;
+      }
+
+      server {
+          listen 80;
+          server_name ecommerce.local;
+
+          location / {
+              proxy_pass http://ecommerce_backend;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+      }
+
+# Enable site & disable default
+- name: Enable ecommerce NGINX site
+  file:
+    src: /etc/nginx/sites-available/ecommerce
+    dest: /etc/nginx/sites-enabled/ecommerce
+    state: link
+
+- name: Remove default NGINX site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+# Test & restart NGINX
+- name: Test NGINX configuration
+  command: nginx -t
+  register: nginx_test
+  changed_when: false
+
+- name: Restart NGINX
+  service:
+    name: nginx
+    state: restarted
+
